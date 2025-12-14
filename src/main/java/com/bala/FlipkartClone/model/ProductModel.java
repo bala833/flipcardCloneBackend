@@ -49,6 +49,10 @@ public class ProductModel {
 
     private String updated_by;
 
+    private byte[] image;
+
+    private String image_type;
+
     @PreUpdate
     @Column(name = "updated_at")
     public void preUpdate() {
@@ -124,6 +128,15 @@ public class ProductModel {
         this.updated_by = updated_by;
     }
 
+
+    public void setImage(byte[] image) {
+        this.image = image;
+    }
+
+    public void setImage_type(String image_type) {
+        this.image_type = image_type;
+    }
+
     public String getSku() {
         return sku;
     }
@@ -194,5 +207,13 @@ public class ProductModel {
 
     public void setImageUrl(String s) {
         this.image_url = s;
+    }
+
+    public byte[] getImage() {
+        return image;
+    }
+
+    public String getImage_type() {
+        return image_type;
     }
 }

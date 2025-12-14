@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -77,32 +78,60 @@ public class ProductImplemention implements ProductService {
 //                .collect(Collectors.toList());
 
         return prod.findAll(pageable)
-                .map(product -> mapper.map(product, ProductDTO.class));
+                .map(product ->
+                    { ProductDTO dto = mapper.map(product, ProductDTO.class);
+                    if (product.getImage() != null) {
+                        dto.setImage_url(
+                                Base64.getEncoder().encodeToString(product.getImage())
+                        );
+                        dto.setImage_type(product.getImage_type());
+                    }
+                        return dto;
+                    });
     }
 
     public ProductDTO GetProductById(Long id) {
-        return prod.findById(id).map(product -> mapper.map(product, ProductDTO.class))
-                .orElse(null);
+
+             ProductModel product = prod.findById(id).orElseThrow( () -> new RuntimeException("Proudct notfound with id: " + id));
+
+            ProductDTO dto = mapper.map(product, ProductDTO.class);
+            if (product.getImage() != null) {
+                dto.setImage_url(
+                        Base64.getEncoder().encodeToString(product.getImage())
+                );
+                dto.setImage_type(product.getImage_type());
+            }
+            return dto;
     }
 
     public void AddProduct(ProductModel p, MultipartFile file) throws IOException {
 
+//        if (file != null && !file.isEmpty()) {
+//
+////            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+//
+////            replace the original image name with index
+//            String fileName = UUID.randomUUID() + (file.getOriginalFilename().contains(".")
+//                    ? file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."))
+//                    : "");
+////            TODO: instead of save image on local static/upload we can save the image on any cdn and same url we can save to setImage_url
+//            Files.createDirectories(Paths.get(uploadDir));
+//            file.transferTo(new File(uploadDir + fileName));
+//            p.setImage_url("/uploads/" + fileName);
+//
+//        } else {
+//            p.setImage_url(null); // or "/uploads/default.png"
+//        }
+
         if (file != null && !file.isEmpty()) {
-
-//            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-
-//            replace the original image name with index
-            String fileName = UUID.randomUUID() + (file.getOriginalFilename().contains(".")
-                    ? file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."))
-                    : "");
-//            TODO: instead of save image on local static/upload we can save the image on any cdn and same url we can save to setImage_url
-            Files.createDirectories(Paths.get(uploadDir));
-            file.transferTo(new File(uploadDir + fileName));
-            p.setImage_url("/uploads/" + fileName);
-
+            p.setImage(file.getBytes());
+            p.setImage_type(file.getContentType());
         } else {
-            p.setImage_url(null); // or "/uploads/default.png"
+            p.setImage(null);
+            p.setImage_type(null);
         }
+
+
         prod.save(p);
     }
 
@@ -113,38 +142,44 @@ public class ProductImplemention implements ProductService {
             ProductModel product = prod_value.get();
             System.out.println(product+ "ppp");
 
-//            get existing image name for the product
-            String storedImagePath = product.getImage_url();
-            // Extract only the filename part
-            String storedFileName = null;
-            if (storedImagePath != null) {
-                storedFileName = storedImagePath.substring(storedImagePath.lastIndexOf('/') + 1);
-            }
+////            get existing image name for the product
+//            String storedImagePath = product.getImage_url();
+//            // Extract only the filename part
+//            String storedFileName = null;
+//            if (storedImagePath != null) {
+//                storedFileName = storedImagePath.substring(storedImagePath.lastIndexOf('/') + 1);
+//            }
+//
+//            String uploadFileName= null;
+//
+//            if (file != null && !file.isEmpty()) {
+//                uploadFileName = file.getOriginalFilename();
+//            }
+//
+//            System.out.println(uploadFileName + storedFileName + "file name");
+//
+////            compare
+//            if (uploadFileName != null && uploadFileName.equalsIgnoreCase(storedFileName)){
+//                p.setImage_url(product.getImage_url());
+//                System.out.println("don't update");
+//            } else if (file != null && !file.isEmpty()) {
+//
+//                //            replace the original image name with index
+//                String fileName = UUID.randomUUID() + (file.getOriginalFilename().contains(".")
+//                        ? file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."))
+//                        : "");
+////            TODO: instead of save image on local static/upload we can save the image on any cdn and same url we can save to setImage_url
+//                Files.createDirectories(Paths.get(uploadDir));
+//                file.transferTo(new File(uploadDir + fileName));
+//                p.setImage_url("/uploads/" + fileName);
+//            } else {
+//                p.setImage_url(product.getImage_url());
+//            }
 
-            String uploadFileName= null;
-
+            // 3️⃣ Handle optional image update
             if (file != null && !file.isEmpty()) {
-                uploadFileName = file.getOriginalFilename();
-            }
-
-            System.out.println(uploadFileName + storedFileName + "file name");
-
-//            compare
-            if (uploadFileName != null && uploadFileName.equalsIgnoreCase(storedFileName)){
-                p.setImage_url(product.getImage_url());
-                System.out.println("don't update");
-            } else if (file != null && !file.isEmpty()) {
-
-                //            replace the original image name with index
-                String fileName = UUID.randomUUID() + (file.getOriginalFilename().contains(".")
-                        ? file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."))
-                        : "");
-//            TODO: instead of save image on local static/upload we can save the image on any cdn and same url we can save to setImage_url
-                Files.createDirectories(Paths.get(uploadDir));
-                file.transferTo(new File(uploadDir + fileName));
-                p.setImage_url("/uploads/" + fileName);
-            } else {
-                p.setImage_url(product.getImage_url());
+                p.setImage(file.getBytes());
+                p.setImage_type(file.getContentType());
             }
 
             p.setId(product.getId());

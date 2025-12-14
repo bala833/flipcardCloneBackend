@@ -1,6 +1,8 @@
 package com.bala.FlipkartClone.dto;
 
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Lob;
 import lombok.*;
 
 @Data
@@ -29,6 +31,14 @@ public class ProductDTO {
     private String created_by;
 
     private String updated_by;
+
+    @Lob
+    @Column(name = "image")
+    private byte[] image;
+
+    @Column(name = "image_type")
+    private String  image_type;
+
 
 
     public Long getId() {
@@ -127,6 +137,14 @@ public class ProductDTO {
         this.updated_by = updated_by;
     }
 
+    public void setImage(byte[] image) {
+        this.image = image;
+    }
+
+    public void setImage_type(String image_type) {
+        this.image_type = image_type;
+    }
+
     public Integer getQuantity_in_stock() {
         return quantity_in_stock;
     }
@@ -149,5 +167,13 @@ public class ProductDTO {
 
     public String getUpdated_by() {
         return updated_by;
+    }
+
+    public byte[] getImage() {
+       return image;
+    }
+
+    public String getImage_type() {
+        return image_type;
     }
 }
