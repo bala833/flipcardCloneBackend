@@ -46,7 +46,7 @@ public class WebLoginSecurity {
                 .csrf(csrf -> csrf.disable()) // disable CSRF for API
                 .cors(Customizer.withDefaults()) // enable CORS
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/login", "/api/register", "api/products", "api/product/search/**", "api/product/**").permitAll()
+                        .requestMatchers("/api/login", "/api/register", "api/products", "api/product/search/**", "api/product/**", "api/banner").permitAll()
                         .requestMatchers("/api/logout").authenticated()
                         .anyRequest().authenticated()
                 )
