@@ -24,6 +24,8 @@ public class BannerDTO {
     @Column(name = "image_type")
     private String  image_type;
 
+    private boolean active;
+
     public Long getId() {
         return id;
     }
@@ -70,5 +72,14 @@ public class BannerDTO {
 
     public void setImage_url(String image_url) {
         this.image_url = image_url;
+    }
+
+
+    public boolean getActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 }

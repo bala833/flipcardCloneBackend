@@ -52,6 +52,7 @@ public class BannersImp implements BannerService {
         dto.setName(banner.getName());
         dto.setDescription(banner.getDescription());
         dto.setImage_url(Base64.getEncoder().encodeToString(banner.getImage())); // do NOT send byte[]
+        dto.setActive(banner.getActive()); // do NOT send byte[]
         return dto;
     }
 
@@ -59,7 +60,7 @@ public class BannersImp implements BannerService {
     public List<BannerDTO> getAllBanners() {
         List<Banner> data = bn.findAll();
         return data.stream()
-                .filter(Banner::isActive)
+//                .filter(Banner::isActive)
                 .map(this::convertTobannerDTO)
                 .toList();
     }
