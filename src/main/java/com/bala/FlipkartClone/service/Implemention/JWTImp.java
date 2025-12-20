@@ -7,6 +7,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -24,32 +25,65 @@ public class JWTImp implements JWTService {
     private TokenBlacklistService tokenBlacklistService;
 
 
-    private String secreatKey = "";
+//    private String secreatKey = "";
+//
+//    public JWTImp() throws NoSuchAlgorithmException {
+//        KeyGenerator keyGenerator = KeyGenerator.getInstance("HmacSHA256");
+//        SecretKey sk = keyGenerator.generateKey();
+//        secreatKey = Base64.getEncoder().encodeToString(sk.getEncoded());
+//    }
 
-    public JWTImp() throws NoSuchAlgorithmException {
-        KeyGenerator keyGenerator = KeyGenerator.getInstance("HmacSHA256");
-        SecretKey sk = keyGenerator.generateKey();
-        secreatKey = Base64.getEncoder().encodeToString(sk.getEncoded());
-    }
+    @Value("${jwt.secret}")
+    private String secretKey;
+
+
+
+//    public String generateToken(String username) {
+////        return "34534dsfqs3453245235sfdg546456dfghdf34534";
+//
+//        Map<String, Object> claims = new HashMap<>();
+////        return Jwts.builder()
+////                .claims()
+////                .add(claims)
+////                .subject(username)
+////                .issuedAt(new Date(System.currentTimeMillis()))
+////                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 30))
+////                .and()
+////                .signWith(getKey())
+////                .compact();
+//        return Jwts.builder()
+//                .setClaims(claims)        // correctly set custom claims
+//                .setSubject(username)     // THIS is mandatory to get username later
+//                .setIssuedAt(new Date())
+//                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 30)) // 30 min
+//                .signWith(getKey(), Jwts.SIG.HS256)        // HS256 key
+//                .compact();
+//
+//    }
+
 
     public String generateToken(String username) {
-//        return "34534dsfqs3453245235sfdg546456dfghdf34534";
-
-        Map<String, Objects> claims = new HashMap<>();
         return Jwts.builder()
-                .claims()
-                .add(claims)
-                .subject(username)
-                .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 30))
-                .and()
-                .signWith(getKey())
+                .setSubject(username)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 30)) // 30 min
+                .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
                 .compact();
+    }
 
+
+    public String validateAndGetUsername(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(secretKey.getBytes())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
     }
 
     private SecretKey getKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(secreatKey);
+        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
+        System.out.println(Keys.hmacShaKeyFor(keyBytes));
         return Keys.hmacShaKeyFor(keyBytes);
 
     }
@@ -65,12 +99,19 @@ public class JWTImp implements JWTService {
     }
 
     public Claims extractAllClaims(String token) {
-        return Jwts.parser()
-                .verifyWith(getKey())
+        return Jwts.parserBuilder()
+                .setSigningKey(secretKey.getBytes())
                 .build()
-                .parseSignedClaims(token)
-                .getPayload();
+                .parseClaimsJws(token)
+                .getBody();
+//                .getSubject();
+
+
+//                .parseSignedClaims(token)
+//                .getPayload();
     }
+
+
 
     public boolean validateToken(String token, UserDetails userDetails) {
 

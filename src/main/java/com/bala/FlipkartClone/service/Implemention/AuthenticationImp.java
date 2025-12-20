@@ -4,6 +4,7 @@ import com.bala.FlipkartClone.model.Users;
 import com.bala.FlipkartClone.service.AuthencationService;
 import com.bala.FlipkartClone.service.JWTService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -30,4 +31,24 @@ public class AuthenticationImp implements AuthencationService {
         }
         return "fail";
     }
+
+    public ResponseCookie varifyUser(Users user) {
+//        String jwt = jwtService.generateToken(request.getUsername());
+
+        Authentication authentication = authManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
+        System.out.println(authentication);
+            String jwt =  jwtService.generateToken(user.getUsername());
+
+            return  ResponseCookie.from("jwt", jwt)
+                    .httpOnly(true)
+                    .secure(true) // temperorily false for HTTP and true in production (HTTPS)
+                    .path("/api")
+                    .maxAge(24 * 60 * 60) // 1 day
+                    .sameSite("Lax") // or "None" if cross-origin // or "Lax"
+                    .build();
+    }
+
 }
+
+
+

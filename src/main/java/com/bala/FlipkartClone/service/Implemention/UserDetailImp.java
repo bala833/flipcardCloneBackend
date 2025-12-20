@@ -31,7 +31,7 @@ public class UserDetailImp  implements UserDetailsService, MyUserDetailsService 
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         System.out.println("Trying to load user: " + username);
         Users user = userrepo.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
-        System.out.println("Found user: " + user.getUsername() + " with password: " + user.getPassword());
+        System.out.println("Found user with username yet to validate the password: " + user.getUsername() );
         return new UserPrincipal(user);
     }
 
